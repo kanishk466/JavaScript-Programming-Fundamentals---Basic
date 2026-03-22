@@ -550,7 +550,7 @@
     </div>
     <ul class="nav-list" id="nav-list"></ul>
     <div class="sidebar-footer">
-      <div>8 topics · JavaScript Fundamentals</div>
+      <div>16 topics · Beginner + Intermediate</div>
       <div style="margin-top:4px;color:#3d3d55;">Click any topic to start revision</div>
     </div>
   </aside>
@@ -1027,6 +1027,597 @@ for (let i = 0; i < 3; i++) {
         `
       }
     ]
+  },
+
+  // ── INTERMEDIATE ──────────────────────────────────────────────
+  {
+    id: 8,
+    title: "Event Bubbling & Capturing",
+    difficulty: "med",
+    icon: "🫧",
+    color: "#00e5b0",
+    iconBg: "rgba(0,229,176,0.1)",
+    section: "Intermediate",
+    question: "What is event bubbling and event capturing?",
+    cards: [
+      {
+        q: "The 3 Phases of Event Propagation",
+        icon: "📡",
+        iconBg: "rgba(0,229,176,0.1)",
+        content: `
+          <p class="explanation">When an event fires on a DOM element, it travels in <strong>3 phases</strong>: Capture (top → target), Target (the element itself), and Bubble (target → top). Most handlers run in the bubble phase by default.</p>
+          <pre><code><span class="kw-purple">// DOM structure:</span>
+<span class="kw-yellow">// &lt;div id="outer"&gt;</span>
+<span class="kw-yellow">//   &lt;div id="inner"&gt;</span>
+<span class="kw-yellow">//     &lt;button id="btn"&gt;Click&lt;/button&gt;</span>
+<span class="kw-yellow">//   &lt;/div&gt;</span>
+<span class="kw-yellow">// &lt;/div&gt;</span>
+
+<span class="kw-yellow">// BUBBLING — default (false) — inner to outer</span>
+document.getElementById(<span class="kw-green">'btn'</span>).addEventListener(<span class="kw-green">'click'</span>, () =>
+  console.log(<span class="kw-green">'btn'</span>));     <span class="kw-purple">// fires 1st</span>
+document.getElementById(<span class="kw-green">'inner'</span>).addEventListener(<span class="kw-green">'click'</span>, () =>
+  console.log(<span class="kw-green">'inner'</span>));   <span class="kw-purple">// fires 2nd</span>
+document.getElementById(<span class="kw-green">'outer'</span>).addEventListener(<span class="kw-green">'click'</span>, () =>
+  console.log(<span class="kw-green">'outer'</span>));   <span class="kw-purple">// fires 3rd</span>
+
+<span class="kw-yellow">// CAPTURING — pass true as 3rd arg — outer to inner</span>
+document.getElementById(<span class="kw-green">'outer'</span>).addEventListener(<span class="kw-green">'click'</span>, () =>
+  console.log(<span class="kw-green">'outer'</span>), <span class="kw-green">true</span>);  <span class="kw-purple">// fires 1st</span></code></pre>
+        `
+      },
+      {
+        q: "stopPropagation & Event Delegation",
+        icon: "🛑",
+        iconBg: "rgba(255,136,153,0.1)",
+        content: `
+          <pre><code><span class="kw-yellow">// Stop bubbling at a specific element</span>
+btn.addEventListener(<span class="kw-green">'click'</span>, (e) => {
+  e.stopPropagation(); <span class="kw-green">// event won't bubble up further</span>
+  console.log(<span class="kw-green">'only btn fires'</span>);
+});
+
+<span class="kw-yellow">// EVENT DELEGATION — powerful pattern!</span>
+<span class="kw-purple">// Instead of adding listeners to 100 buttons:</span>
+document.getElementById(<span class="kw-green">'list'</span>).addEventListener(<span class="kw-green">'click'</span>, (e) => {
+  if (e.target.tagName === <span class="kw-green">'LI'</span>) {
+    console.log(<span class="kw-green">'Clicked item:'</span>, e.target.textContent);
+  }
+});
+<span class="kw-green">// One listener on parent handles ALL child clicks ✅</span>
+<span class="kw-green">// Works even for dynamically added elements!</span></code></pre>
+          <div class="tip-box"><span class="tip-icon">💡</span><span><strong>Event Delegation</strong> is a must-know pattern — attach ONE listener to a parent instead of many listeners on children. Better performance, works for dynamic elements.</span></div>
+        `
+      }
+    ]
+  },
+  {
+    id: 9,
+    title: "Event Loop & Call Stack",
+    difficulty: "hard",
+    icon: "🔁",
+    color: "#7b61ff",
+    iconBg: "rgba(123,97,255,0.1)",
+    section: "Intermediate",
+    question: "Explain the JavaScript event loop and call stack.",
+    cards: [
+      {
+        q: "How JavaScript Executes Code",
+        icon: "⚙",
+        iconBg: "rgba(123,97,255,0.1)",
+        content: `
+          <p class="explanation">JavaScript is <strong>single-threaded</strong> — it can only do one thing at a time. The <strong>Call Stack</strong> tracks function execution. The <strong>Event Loop</strong> moves tasks from the queue to the stack when the stack is empty.</p>
+          <pre><code><span class="kw-yellow">// The 4 key players:</span>
+<span class="kw-purple">// 1. Call Stack   — where code executes (LIFO)</span>
+<span class="kw-purple">// 2. Web APIs     — setTimeout, fetch, DOM events (browser handles)</span>
+<span class="kw-purple">// 3. Task Queue   — macrotasks: setTimeout, setInterval callbacks</span>
+<span class="kw-purple">// 4. Microtask Q  — Promise .then(), queueMicrotask() (higher priority!)</span>
+
+console.log(<span class="kw-green">'1 - Start'</span>);           <span class="kw-purple">// Call Stack → runs immediately</span>
+
+setTimeout(() => {
+  console.log(<span class="kw-green">'2 - setTimeout'</span>);    <span class="kw-purple">// Task Queue (macro)</span>
+}, 0);
+
+Promise.resolve().then(() => {
+  console.log(<span class="kw-green">'3 - Promise'</span>);       <span class="kw-purple">// Microtask Queue</span>
+});
+
+console.log(<span class="kw-green">'4 - End'</span>);             <span class="kw-purple">// Call Stack → runs immediately</span>
+
+<span class="kw-yellow">// Output order:</span>
+<span class="kw-green">// 1 - Start</span>
+<span class="kw-green">// 4 - End</span>
+<span class="kw-green">// 3 - Promise    ← microtasks run BEFORE macrotasks!</span>
+<span class="kw-green">// 2 - setTimeout ← macrotask runs last</span></code></pre>
+        `
+      },
+      {
+        q: "Priority Order & Practical Impact",
+        icon: "🏆",
+        iconBg: "rgba(240,192,64,0.1)",
+        content: `
+          <pre><code><span class="kw-yellow">// Priority: Sync > Microtasks > Macrotasks</span>
+
+<span class="kw-yellow">// Microtasks (higher priority):</span>
+<span class="kw-green">// Promise.then / catch / finally</span>
+<span class="kw-green">// async/await (internally uses microtasks)</span>
+<span class="kw-green">// queueMicrotask()</span>
+<span class="kw-green">// MutationObserver</span>
+
+<span class="kw-yellow">// Macrotasks (lower priority):</span>
+<span class="kw-green">// setTimeout / setInterval</span>
+<span class="kw-green">// setImmediate (Node.js)</span>
+<span class="kw-green">// I/O, UI rendering</span>
+
+<span class="kw-yellow">// Practical: why setTimeout(fn, 0) isn't truly 0ms</span>
+console.log(<span class="kw-green">'A'</span>);
+setTimeout(() => console.log(<span class="kw-green">'B'</span>), 0);
+Promise.resolve().then(() => console.log(<span class="kw-green">'C'</span>));
+console.log(<span class="kw-green">'D'</span>);
+<span class="kw-green">// Output: A → D → C → B</span></code></pre>
+          <div class="tip-box"><span class="tip-icon">🎯</span><span>Most asked interview question: <em>"What's the output of this code?"</em> with mixed sync/Promise/setTimeout. Remember: <strong>Sync → Microtask → Macrotask</strong>.</span></div>
+        `
+      }
+    ]
+  },
+  {
+    id: 10,
+    title: "null vs undefined",
+    difficulty: "easy",
+    icon: "❓",
+    color: "#f0c040",
+    iconBg: "rgba(240,192,64,0.1)",
+    section: "Intermediate",
+    question: "What is the difference between null and undefined?",
+    cards: [
+      {
+        q: "null vs undefined — Full Comparison",
+        icon: "⚖",
+        iconBg: "rgba(240,192,64,0.1)",
+        content: `
+          <table>
+            <tr><th>Aspect</th><th>undefined</th><th>null</th></tr>
+            <tr><td>Meaning</td><td>Declared, not assigned</td><td>Intentionally empty</td></tr>
+            <tr><td>Set by</td><td>JavaScript engine</td><td>Developer explicitly</td></tr>
+            <tr><td>typeof</td><td>"undefined"</td><td>"object" (JS bug!)</td></tr>
+            <tr><td>== null</td><td>true</td><td>true</td></tr>
+            <tr><td>=== null</td><td>false</td><td>true</td></tr>
+            <tr><td>Falsy?</td><td>Yes</td><td>Yes</td></tr>
+          </table>
+          <pre><code><span class="kw-yellow">// undefined — JS assigns automatically</span>
+let x;
+console.log(x);           <span class="kw-green">// undefined</span>
+console.log(typeof x);    <span class="kw-green">// "undefined"</span>
+
+function greet(name) {
+  console.log(name);      <span class="kw-green">// undefined (no arg passed)</span>
+}
+greet();
+
+const obj = { a: 1 };
+console.log(obj.b);       <span class="kw-green">// undefined (key doesn't exist)</span>
+
+<span class="kw-yellow">// null — developer sets intentionally</span>
+let user = null;          <span class="kw-purple">// "no user yet" — intentional empty</span>
+console.log(typeof null); <span class="kw-red">// "object" ← famous JS bug</span>
+
+<span class="kw-yellow">// Equality nuance</span>
+null == undefined;  <span class="kw-green">// true  (loose — both are "nothing")</span>
+null === undefined; <span class="kw-red">// false (strict — different types)</span>
+
+<span class="kw-yellow">// Safe null check</span>
+if (x == null) { <span class="kw-purple">// catches BOTH null and undefined</span>
+  console.log(<span class="kw-green">'x is null or undefined'</span>);
+}</code></pre>
+        `
+      }
+    ]
+  },
+  {
+    id: 11,
+    title: "Prototypal Inheritance",
+    difficulty: "hard",
+    icon: "🧬",
+    color: "#00e5b0",
+    iconBg: "rgba(0,229,176,0.1)",
+    section: "Intermediate",
+    question: "How does prototypal inheritance work in JavaScript?",
+    cards: [
+      {
+        q: "The Prototype Chain",
+        icon: "🔗",
+        iconBg: "rgba(0,229,176,0.1)",
+        content: `
+          <p class="explanation">Every object in JS has a hidden <strong>[[Prototype]]</strong> link to another object. When you access a property, JS looks in the object first, then walks up the prototype chain until it finds it or hits <code class="inline">null</code>.</p>
+          <pre><code><span class="kw-yellow">// Every object has __proto__ (the prototype link)</span>
+const animal = {
+  speak() { console.log(<span class="kw-green">\`\${this.name} makes a sound\`</span>); }
+};
+
+const dog = Object.create(animal); <span class="kw-purple">// dog's prototype = animal</span>
+dog.name = <span class="kw-green">'Rex'</span>;
+dog.speak(); <span class="kw-green">// "Rex makes a sound" ✅ (found on prototype)</span>
+
+<span class="kw-yellow">// Prototype chain lookup:</span>
+<span class="kw-purple">// dog → animal → Object.prototype → null</span>
+
+console.log(dog.hasOwnProperty(<span class="kw-green">'name'</span>));  <span class="kw-green">// true (own property)</span>
+console.log(dog.hasOwnProperty(<span class="kw-green">'speak'</span>)); <span class="kw-red">// false (inherited)</span></code></pre>
+        `
+      },
+      {
+        q: "Constructor Functions & ES6 Classes",
+        icon: "🏭",
+        iconBg: "rgba(123,97,255,0.1)",
+        content: `
+          <pre><code><span class="kw-yellow">// Old way — Constructor Functions</span>
+function Animal(name) {
+  this.name = name;
+}
+Animal.prototype.speak = function() {
+  console.log(<span class="kw-green">\`\${this.name} speaks\`</span>);
+};
+
+function Dog(name, breed) {
+  Animal.call(this, name); <span class="kw-purple">// inherit properties</span>
+  this.breed = breed;
+}
+Dog.prototype = Object.create(Animal.prototype); <span class="kw-purple">// inherit methods</span>
+
+<span class="kw-yellow">// Modern way — ES6 Classes (same thing, nicer syntax)</span>
+class Animal {
+  constructor(name) { this.name = name; }
+  speak() { console.log(<span class="kw-green">\`\${this.name} speaks\`</span>); }
+}
+
+class Dog extends Animal {
+  constructor(name, breed) {
+    super(name);  <span class="kw-purple">// calls Animal constructor</span>
+    this.breed = breed;
+  }
+  fetch() { console.log(<span class="kw-green">\`\${this.name} fetches!\`</span>); }
+}
+
+const rex = new Dog(<span class="kw-green">'Rex'</span>, <span class="kw-green">'Labrador'</span>);
+rex.speak();  <span class="kw-green">// "Rex speaks" (inherited from Animal)</span>
+rex.fetch();  <span class="kw-green">// "Rex fetches!" (own method)</span></code></pre>
+          <div class="tip-box"><span class="tip-icon">💡</span><span>ES6 <code class="inline">class</code> is <strong>syntactic sugar</strong> — under the hood it still uses prototypal inheritance. Classes don't add new behaviour, just cleaner syntax.</span></div>
+        `
+      }
+    ]
+  },
+  {
+    id: 12,
+    title: "Higher-Order Functions",
+    difficulty: "med",
+    icon: "🎯",
+    color: "#7b61ff",
+    iconBg: "rgba(123,97,255,0.1)",
+    section: "Intermediate",
+    question: "What are higher-order functions? Give examples.",
+    cards: [
+      {
+        q: "Definition & Built-in Examples",
+        icon: "📐",
+        iconBg: "rgba(123,97,255,0.1)",
+        content: `
+          <p class="explanation">A <strong>Higher-Order Function (HOF)</strong> is a function that either <strong>takes a function as an argument</strong>, or <strong>returns a function</strong>, or both. This is possible because in JS, functions are first-class citizens.</p>
+          <pre><code><span class="kw-yellow">// HOF that TAKES a function as argument</span>
+const nums = [1, 2, 3, 4, 5];
+
+nums.forEach(n => console.log(n));       <span class="kw-purple">// forEach — HOF</span>
+nums.map(n => n * 2);                    <span class="kw-purple">// map — HOF</span>
+nums.filter(n => n % 2 === 0);           <span class="kw-purple">// filter — HOF</span>
+nums.reduce((acc, n) => acc + n, 0);     <span class="kw-purple">// reduce — HOF</span>
+nums.sort((a, b) => a - b);              <span class="kw-purple">// sort — HOF</span>
+nums.find(n => n > 3);                   <span class="kw-purple">// find — HOF</span>
+nums.every(n => n > 0);                  <span class="kw-purple">// every — HOF</span>
+
+<span class="kw-yellow">// HOF that RETURNS a function</span>
+function multiply(factor) {
+  return (num) => num * factor; <span class="kw-green">// returns a function</span>
+}
+
+const triple = multiply(3);
+triple(5); <span class="kw-green">// 15</span></code></pre>
+        `
+      },
+      {
+        q: "Custom Higher-Order Functions",
+        icon: "🛠",
+        iconBg: "rgba(240,192,64,0.1)",
+        content: `
+          <pre><code><span class="kw-yellow">// 1. Function Composition</span>
+const compose = (f, g) => x => f(g(x));
+
+const add10  = x => x + 10;
+const double = x => x * 2;
+
+const add10ThenDouble = compose(double, add10);
+add10ThenDouble(5); <span class="kw-green">// (5+10)*2 = 30</span>
+
+<span class="kw-yellow">// 2. Memoization (caching HOF)</span>
+function memoize(fn) {
+  const cache = {};
+  return function(n) {
+    if (cache[n] !== undefined) {
+      console.log(<span class="kw-green">'from cache'</span>);
+      return cache[n];
+    }
+    cache[n] = fn(n);
+    return cache[n];
+  };
+}
+
+const slowSquare = n => n * n;
+const fastSquare = memoize(slowSquare);
+fastSquare(10); <span class="kw-purple">// computed</span>
+fastSquare(10); <span class="kw-green">// from cache ⚡</span>
+
+<span class="kw-yellow">// 3. once() — function runs only once</span>
+function once(fn) {
+  let called = false;
+  return function(...args) {
+    if (!called) { called = true; return fn(...args); }
+  };
+}
+
+const init = once(() => console.log(<span class="kw-green">'Initialized!'</span>));
+init(); <span class="kw-green">// "Initialized!"</span>
+init(); <span class="kw-purple">// nothing — won't run again</span></code></pre>
+        `
+      }
+    ]
+  },
+  {
+    id: 13,
+    title: "map, filter & reduce",
+    difficulty: "med",
+    icon: "🗃",
+    color: "#ff8899",
+    iconBg: "rgba(255,136,153,0.1)",
+    section: "Intermediate",
+    question: "Explain the difference between map(), filter(), and reduce().",
+    cards: [
+      {
+        q: "map() — Transform Every Element",
+        icon: "🔄",
+        iconBg: "rgba(0,229,176,0.1)",
+        content: `
+          <p class="explanation"><code class="inline">map()</code> creates a <strong>new array</strong> by applying a function to every element. Original array is unchanged. Output array has the <strong>same length</strong> as input.</p>
+          <pre><code>const nums = [1, 2, 3, 4, 5];
+
+<span class="kw-yellow">// Transform numbers</span>
+const doubled = nums.map(n => n * 2);
+console.log(doubled); <span class="kw-green">// [2, 4, 6, 8, 10]</span>
+
+<span class="kw-yellow">// Transform objects</span>
+const users = [
+  { name: <span class="kw-green">'Alice'</span>, age: 25 },
+  { name: <span class="kw-green">'Bob'</span>,   age: 30 },
+];
+
+const names = users.map(u => u.name);
+console.log(names); <span class="kw-green">// ['Alice', 'Bob']</span>
+
+const withGreeting = users.map(u => ({
+  ...u,
+  greeting: <span class="kw-green">\`Hi, I'm \${u.name}\`</span>
+}));</code></pre>
+        `
+      },
+      {
+        q: "filter() & reduce() — Select & Accumulate",
+        icon: "🎛",
+        iconBg: "rgba(123,97,255,0.1)",
+        content: `
+          <pre><code><span class="kw-yellow">// filter() — keep elements that pass the test</span>
+const nums = [1, 2, 3, 4, 5, 6];
+
+const evens = nums.filter(n => n % 2 === 0);
+console.log(evens); <span class="kw-green">// [2, 4, 6]</span>
+
+const adults = users.filter(u => u.age >= 18);
+
+<span class="kw-yellow">// reduce() — fold array into single value</span>
+<span class="kw-purple">// reduce(callback, initialValue)</span>
+<span class="kw-purple">// callback(accumulator, currentValue)</span>
+
+const sum = nums.reduce((acc, n) => acc + n, 0);
+console.log(sum); <span class="kw-green">// 21</span>
+
+<span class="kw-yellow">// Reduce to an object (group by)</span>
+const fruits = [<span class="kw-green">'apple'</span>, <span class="kw-green">'banana'</span>, <span class="kw-green">'apple'</span>, <span class="kw-green">'cherry'</span>];
+const count = fruits.reduce((acc, fruit) => {
+  acc[fruit] = (acc[fruit] || 0) + 1;
+  return acc;
+}, {});
+<span class="kw-green">// { apple: 2, banana: 1, cherry: 1 }</span>
+
+<span class="kw-yellow">// Chain them together!</span>
+const result = [1,2,3,4,5,6,7,8,9,10]
+  .filter(n => n % 2 === 0)   <span class="kw-purple">// [2,4,6,8,10]</span>
+  .map(n => n * n)             <span class="kw-purple">// [4,16,36,64,100]</span>
+  .reduce((a, b) => a + b, 0); <span class="kw-green">// 220</span></code></pre>
+          <div class="tip-box"><span class="tip-icon">💡</span><span><strong>map</strong> = transform (same length) · <strong>filter</strong> = select (shorter/equal) · <strong>reduce</strong> = accumulate (any shape). Chaining all three is a very common interview question!</span></div>
+        `
+      }
+    ]
+  },
+  {
+    id: 14,
+    title: "The 'this' Keyword",
+    difficulty: "hard",
+    icon: "👆",
+    color: "#f0c040",
+    iconBg: "rgba(240,192,64,0.1)",
+    section: "Intermediate",
+    question: "What is the 'this' keyword and how does its value get determined?",
+    cards: [
+      {
+        q: "5 Rules for Determining 'this'",
+        icon: "📋",
+        iconBg: "rgba(240,192,64,0.1)",
+        content: `
+          <p class="explanation"><code class="inline">this</code> refers to the <strong>execution context</strong> — the object that is currently calling the function. Its value depends entirely on <strong>how the function is called</strong>, not where it's defined.</p>
+          <pre><code><span class="kw-yellow">// Rule 1: Global context → window (browser) / global (Node)</span>
+console.log(this); <span class="kw-purple">// window in browser</span>
+
+<span class="kw-yellow">// Rule 2: Object method → the object</span>
+const obj = {
+  name: <span class="kw-green">'Alice'</span>,
+  greet() { console.log(this.name); } <span class="kw-green">// 'Alice'</span>
+};
+obj.greet();
+
+<span class="kw-yellow">// Rule 3: Regular function call → undefined (strict) / window</span>
+function alone() { console.log(this); }
+alone(); <span class="kw-red">// undefined in strict mode</span>
+
+<span class="kw-yellow">// Rule 4: Arrow function → inherits from enclosing scope</span>
+const timer = {
+  name: <span class="kw-green">'Timer'</span>,
+  start() {
+    setTimeout(() => {
+      console.log(this.name); <span class="kw-green">// 'Timer' ✅ (lexical this)</span>
+    }, 100);
+  }
+};
+
+<span class="kw-yellow">// Rule 5: new keyword → newly created object</span>
+function Person(name) {
+  this.name = name; <span class="kw-purple">// 'this' = new object</span>
+}
+const alice = new Person(<span class="kw-green">'Alice'</span>);
+console.log(alice.name); <span class="kw-green">// 'Alice'</span></code></pre>
+        `
+      },
+      {
+        q: "Explicit Binding: call, apply, bind",
+        icon: "🔧",
+        iconBg: "rgba(123,97,255,0.1)",
+        content: `
+          <pre><code>function greet(greeting, punctuation) {
+  console.log(<span class="kw-green">\`\${greeting}, \${this.name}\${punctuation}\`</span>);
+}
+
+const user = { name: <span class="kw-green">'Alice'</span> };
+
+<span class="kw-yellow">// call() — invoke immediately, args one by one</span>
+greet.call(user, <span class="kw-green">'Hello'</span>, <span class="kw-green">'!'</span>);  <span class="kw-green">// "Hello, Alice!"</span>
+
+<span class="kw-yellow">// apply() — invoke immediately, args as array</span>
+greet.apply(user, [<span class="kw-green">'Hi'</span>, <span class="kw-green">'.'</span>]);   <span class="kw-green">// "Hi, Alice."</span>
+
+<span class="kw-yellow">// bind() — returns NEW function with 'this' locked</span>
+const boundGreet = greet.bind(user, <span class="kw-green">'Hey'</span>);
+boundGreet(<span class="kw-green">'?'</span>);              <span class="kw-green">// "Hey, Alice?"</span>
+<span class="kw-purple">// boundGreet can be called later, 'this' stays locked</span></code></pre>
+          <div class="tip-box"><span class="tip-icon">🎯</span><span><strong>call</strong> = call now, args separate · <strong>apply</strong> = call now, args as array · <strong>bind</strong> = don't call now, return bound copy. <em>C-A-B: Call Apply Bind</em></span></div>
+        `
+      }
+    ]
+  },
+  {
+    id: 15,
+    title: "Error Handling in async/await",
+    difficulty: "hard",
+    icon: "🚨",
+    color: "#ff8899",
+    iconBg: "rgba(255,136,153,0.1)",
+    section: "Intermediate",
+    question: "How do you handle errors in async/await?",
+    cards: [
+      {
+        q: "try/catch — The Standard Pattern",
+        icon: "🛡",
+        iconBg: "rgba(255,136,153,0.1)",
+        content: `
+          <p class="explanation">With <code class="inline">async/await</code>, use <code class="inline">try/catch/finally</code> to handle errors. Any rejected Promise inside <code class="inline">await</code> will throw and be caught by <code class="inline">catch</code>.</p>
+          <pre><code><span class="kw-yellow">// Basic try/catch</span>
+async function fetchUser(id) {
+  try {
+    const res  = await fetch(<span class="kw-green">\`/api/users/\${id}\`</span>);
+
+    if (!res.ok) {
+      throw new Error(<span class="kw-green">\`HTTP error! Status: \${res.status}\`</span>);
+    }
+
+    const user = await res.json();
+    return user;
+
+  } catch (error) {
+    console.error(<span class="kw-red">'Fetch failed:'</span>, error.message);
+    return null; <span class="kw-purple">// graceful fallback</span>
+
+  } finally {
+    console.log(<span class="kw-green">'Request completed'</span>); <span class="kw-purple">// always runs</span>
+  }
+}
+
+<span class="kw-yellow">// Distinguishing error types</span>
+async function loadData() {
+  try {
+    const data = await fetchSomething();
+    return data;
+  } catch (err) {
+    if (err instanceof TypeError) {
+      console.error(<span class="kw-red">'Network error'</span>);
+    } else if (err instanceof SyntaxError) {
+      console.error(<span class="kw-red">'Invalid JSON'</span>);
+    } else {
+      console.error(<span class="kw-red">'Unknown error:'</span>, err);
+    }
+  }
+}</code></pre>
+        `
+      },
+      {
+        q: "Advanced Patterns — Reusable Error Handling",
+        icon: "🏗",
+        iconBg: "rgba(0,229,176,0.1)",
+        content: `
+          <pre><code><span class="kw-yellow">// Pattern 1: Wrapper function — returns [data, error]</span>
+async function tryCatch(promise) {
+  try {
+    const data = await promise;
+    return [data, null];
+  } catch (err) {
+    return [null, err];
+  }
+}
+
+<span class="kw-yellow">// Clean usage — no nested try/catch!</span>
+const [user, err] = await tryCatch(fetchUser(1));
+if (err) {
+  console.error(<span class="kw-red">'Failed:'</span>, err);
+} else {
+  console.log(<span class="kw-green">'User:'</span>, user);
+}
+
+<span class="kw-yellow">// Pattern 2: Global unhandled rejection handler</span>
+window.addEventListener(<span class="kw-green">'unhandledrejection'</span>, (event) => {
+  console.error(<span class="kw-red">'Unhandled Promise:'</span>, event.reason);
+  event.preventDefault(); <span class="kw-purple">// prevent default error logging</span>
+});
+
+<span class="kw-yellow">// Pattern 3: Multiple awaits — one catch</span>
+async function multiStep() {
+  try {
+    const user    = await fetchUser();
+    const orders  = await fetchOrders(user.id);
+    const invoice = await fetchInvoice(orders[0].id);
+    return invoice;
+  } catch (err) {
+    <span class="kw-green">// catches error from ANY of the 3 awaits ✅</span>
+    console.error(err);
+  }
+}</code></pre>
+          <div class="tip-box"><span class="tip-icon">💡</span><span>The <strong>[data, error] wrapper pattern</strong> (Go-style error handling) is very popular in production codebases — avoids deeply nested try/catch blocks.</span></div>
+        `
+      }
+    ]
   }
 ];
 
@@ -1047,11 +1638,21 @@ function updateProgress() {
 function buildNav() {
   const list = document.getElementById('nav-list');
   list.innerHTML = '';
+  let lastSection = null;
   topics.forEach((t, i) => {
+    const section = t.section || 'Beginner';
+    if (section !== lastSection) {
+      const sep = document.createElement('li');
+      sep.style.cssText = 'padding:10px 24px 4px;font-size:9px;letter-spacing:0.12em;text-transform:uppercase;color:#3d3d55;font-family:Space Mono,monospace;pointer-events:none;border-top:' + (lastSection ? '1px solid #1e1e2e' : 'none') + ';margin-top:' + (lastSection ? '8px' : '0');
+      sep.textContent = section;
+      list.appendChild(sep);
+      lastSection = section;
+    }
     const li = document.createElement('li');
+    const num = (i + 1).toString().padStart(2, '0');
     li.className = 'nav-item' + (i === currentTopic ? ' active' : '') + (doneSet.has(i) ? ' done' : '');
     li.innerHTML = `
-      <span class="nav-num">0${i + 1}</span>
+      <span class="nav-num">${num}</span>
       <span style="flex:1;line-height:1.3;">${t.title}</span>
       <span class="nav-check"></span>
     `;
@@ -1103,7 +1704,7 @@ function render() {
 
   document.getElementById('main-content').innerHTML = `
     <div class="topic-header">
-      <div class="topic-tag"><span class="topic-dot"></span> Topic 0${currentTopic + 1} of 08</div>
+      <div class="topic-tag"><span class="topic-dot"></span> Topic ${(currentTopic + 1).toString().padStart(2,'0')} of ${topics.length.toString().padStart(2,'0')} · ${t.section || 'Beginner'}</div>
       <div class="topic-title">${t.title.replace(/([A-Z]|\()/g, m => `<span>${m}</span>`)
         .replace('<span>(<', '(<').replace('(</span>', '(')}</div>
       <div class="topic-meta">
