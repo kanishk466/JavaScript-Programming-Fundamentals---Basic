@@ -550,7 +550,7 @@
     </div>
     <ul class="nav-list" id="nav-list"></ul>
     <div class="sidebar-footer">
-      <div>16 topics · Beginner + Intermediate</div>
+      <div>24 topics · Beginner + Intermediate + Advanced</div>
       <div style="margin-top:4px;color:#3d3d55;">Click any topic to start revision</div>
     </div>
   </aside>
@@ -1615,6 +1615,710 @@ async function multiStep() {
   }
 }</code></pre>
           <div class="tip-box"><span class="tip-icon">💡</span><span>The <strong>[data, error] wrapper pattern</strong> (Go-style error handling) is very popular in production codebases — avoids deeply nested try/catch blocks.</span></div>
+        `
+      }
+    ]
+  },
+
+  // ── ADVANCED ──────────────────────────────────────────────────
+  {
+    id: 16,
+    title: "Debouncing & Throttling",
+    difficulty: "hard",
+    icon: "⏱",
+    color: "#f0c040",
+    iconBg: "rgba(240,192,64,0.1)",
+    section: "Advanced",
+    question: "Explain the concept of debouncing and throttling with implementation.",
+    cards: [
+      {
+        q: "Debounce — Wait Until User Stops",
+        icon: "⏸",
+        iconBg: "rgba(240,192,64,0.1)",
+        content: `
+          <p class="explanation"><strong>Debounce</strong> delays function execution until a user <strong>stops triggering</strong> the event for a specified time. Perfect for search inputs — no need to fire on every keystroke.</p>
+          <pre><code><span class="kw-yellow">// Debounce implementation</span>
+function debounce(fn, delay) {
+  let timer;
+  return function(...args) {
+    clearTimeout(timer);               <span class="kw-purple">// cancel previous timer</span>
+    timer = setTimeout(() => {
+      fn.apply(this, args);            <span class="kw-purple">// run only after delay ms of silence</span>
+    }, delay);
+  };
+}
+
+<span class="kw-yellow">// Usage — search input</span>
+const searchAPI = (query) => {
+  console.log(<span class="kw-green">\`Searching: \${query}\`</span>);
+  <span class="kw-purple">// fetch('/api/search?q=' + query)</span>
+};
+
+const debouncedSearch = debounce(searchAPI, 300);
+
+input.addEventListener(<span class="kw-green">'input'</span>, (e) => {
+  debouncedSearch(e.target.value);
+});
+<span class="kw-green">// User types "hello" rapidly — API called only ONCE
+// 300ms after they stop typing ✅</span></code></pre>
+          <div class="tip-box"><span class="tip-icon">💡</span><span>Think of debounce as an elevator — it waits for everyone to finish entering before closing the doors and moving.</span></div>
+        `
+      },
+      {
+        q: "Throttle — Limit Rate of Execution",
+        icon: "🚦",
+        iconBg: "rgba(123,97,255,0.1)",
+        content: `
+          <p class="explanation"><strong>Throttle</strong> ensures a function is called <strong>at most once</strong> per specified interval, no matter how many times the event fires. Perfect for scroll/resize handlers.</p>
+          <pre><code><span class="kw-yellow">// Throttle implementation</span>
+function throttle(fn, limit) {
+  let inThrottle = false;
+  return function(...args) {
+    if (!inThrottle) {
+      fn.apply(this, args);            <span class="kw-purple">// execute immediately</span>
+      inThrottle = true;
+      setTimeout(() => {
+        inThrottle = false;            <span class="kw-purple">// allow again after limit ms</span>
+      }, limit);
+    }
+  };
+}
+
+<span class="kw-yellow">// Usage — scroll position tracker</span>
+const updateScrollPos = () => {
+  console.log(<span class="kw-green">'Scroll Y:'</span>, window.scrollY);
+};
+
+const throttledScroll = throttle(updateScrollPos, 100);
+window.addEventListener(<span class="kw-green">'scroll'</span>, throttledScroll);
+<span class="kw-green">// Fires at most once every 100ms, even if scroll is rapid ✅</span>
+
+<span class="kw-yellow">// When to use which?</span>
+<span class="kw-purple">// Debounce → search input, window resize final value, form validation</span>
+<span class="kw-purple">// Throttle → scroll events, mouse move, game loops, API rate limiting</span></code></pre>
+          <table>
+            <tr><th>Feature</th><th>Debounce</th><th>Throttle</th></tr>
+            <tr><td>Fires when?</td><td>After events stop</td><td>At regular intervals</td></tr>
+            <tr><td>Use case</td><td>Search, resize end</td><td>Scroll, mousemove</td></tr>
+            <tr><td>Guarantees run?</td><td>Only after silence</td><td>Yes, periodically</td></tr>
+          </table>
+        `
+      }
+    ]
+  },
+  {
+    id: 17,
+    title: "Web Workers",
+    difficulty: "hard",
+    icon: "👷",
+    color: "#00e5b0",
+    iconBg: "rgba(0,229,176,0.1)",
+    section: "Advanced",
+    question: "What are Web Workers and when would you use them?",
+    cards: [
+      {
+        q: "What are Web Workers?",
+        icon: "🧵",
+        iconBg: "rgba(0,229,176,0.1)",
+        content: `
+          <p class="explanation">Web Workers run JavaScript in a <strong>background thread</strong>, separate from the main UI thread. This prevents heavy computation from <strong>blocking the UI</strong>. Workers communicate via <code class="inline">postMessage</code>.</p>
+          <pre><code><span class="kw-yellow">// main.js — create and use a worker</span>
+const worker = new Worker(<span class="kw-green">'worker.js'</span>);
+
+<span class="kw-yellow">// Send data TO worker</span>
+worker.postMessage({ numbers: [1, 2, 3, 4, 5] });
+
+<span class="kw-yellow">// Receive result FROM worker</span>
+worker.onmessage = (event) => {
+  console.log(<span class="kw-green">'Result:'</span>, event.data.result);
+};
+
+worker.onerror = (err) => {
+  console.error(<span class="kw-red">'Worker error:'</span>, err.message);
+};
+
+<span class="kw-yellow">// Terminate when done</span>
+worker.terminate();</code></pre>
+          <pre><code><span class="kw-yellow">// worker.js — runs in background thread</span>
+self.onmessage = (event) => {
+  const { numbers } = event.data;
+
+  <span class="kw-purple">// Heavy computation — won't block UI!</span>
+  const result = numbers.reduce((sum, n) => {
+    <span class="kw-purple">// Imagine this is 10 million items...</span>
+    return sum + n;
+  }, 0);
+
+  self.postMessage({ result }); <span class="kw-green">// send back to main</span>
+};</code></pre>
+        `
+      },
+      {
+        q: "Worker Limitations & Use Cases",
+        icon: "📋",
+        iconBg: "rgba(255,136,153,0.1)",
+        content: `
+          <pre><code><span class="kw-yellow">// Workers CANNOT access:</span>
+<span class="kw-red">// ✗ DOM (document, window)</span>
+<span class="kw-red">// ✗ localStorage / sessionStorage</span>
+<span class="kw-red">// ✗ alert(), confirm()</span>
+
+<span class="kw-yellow">// Workers CAN access:</span>
+<span class="kw-green">// ✓ fetch() / XMLHttpRequest</span>
+<span class="kw-green">// ✓ WebSockets</span>
+<span class="kw-green">// ✓ IndexedDB</span>
+<span class="kw-green">// ✓ setTimeout / setInterval</span>
+<span class="kw-green">// ✓ Crypto API</span>
+
+<span class="kw-yellow">// Types of Workers:</span>
+<span class="kw-purple">// Dedicated Worker  — one tab, one worker (most common)</span>
+<span class="kw-purple">// Shared Worker     — shared across multiple tabs</span>
+<span class="kw-purple">// Service Worker    — network proxy, offline caching (PWA)</span></code></pre>
+          <ul class="key-points">
+            <li><strong>Image/video processing</strong> — filters, compression, encoding</li>
+            <li><strong>Large data sorting/parsing</strong> — CSV with millions of rows</li>
+            <li><strong>Cryptography</strong> — hashing, encryption without UI freeze</li>
+            <li><strong>Real-time data processing</strong> — stock feeds, sensor data</li>
+            <li><strong>Game physics / AI</strong> — pathfinding, collision detection</li>
+          </ul>
+          <div class="tip-box"><span class="tip-icon">🎯</span><span>Rule of thumb: if a task takes <strong>>16ms</strong> (1 frame at 60fps), offload it to a Worker to keep your UI buttery smooth.</span></div>
+        `
+      }
+    ]
+  },
+  {
+    id: 18,
+    title: "Garbage Collection",
+    difficulty: "hard",
+    icon: "🗑",
+    color: "#7b61ff",
+    iconBg: "rgba(123,97,255,0.1)",
+    section: "Advanced",
+    question: "How does JavaScript's garbage collection work?",
+    cards: [
+      {
+        q: "Mark-and-Sweep Algorithm",
+        icon: "🔍",
+        iconBg: "rgba(123,97,255,0.1)",
+        content: `
+          <p class="explanation">JavaScript uses <strong>automatic memory management</strong>. The GC periodically identifies objects that are no longer <strong>reachable</strong> from the root (global scope) and frees their memory.</p>
+          <pre><code><span class="kw-yellow">// Memory lifecycle:</span>
+<span class="kw-purple">// 1. Allocate — memory is given when objects are created</span>
+<span class="kw-purple">// 2. Use       — read/write operations</span>
+<span class="kw-purple">// 3. Release   — GC frees unreachable memory automatically</span>
+
+<span class="kw-yellow">// Mark-and-Sweep — V8's primary algorithm</span>
+<span class="kw-purple">// Step 1: Start from "roots" (global vars, call stack)</span>
+<span class="kw-purple">// Step 2: MARK all reachable objects</span>
+<span class="kw-purple">// Step 3: SWEEP (delete) anything NOT marked</span>
+
+let user = { name: <span class="kw-green">"Alice"</span> }; <span class="kw-purple">// allocated, reachable ✅</span>
+user = null;                    <span class="kw-purple">// object is now unreachable → GC collects it</span>
+
+<span class="kw-yellow">// Reference counting (older concept)</span>
+let a = { x: 1 };  <span class="kw-purple">// ref count: 1</span>
+let b = a;          <span class="kw-purple">// ref count: 2</span>
+a = null;           <span class="kw-purple">// ref count: 1</span>
+b = null;           <span class="kw-purple">// ref count: 0 → eligible for GC</span>
+
+<span class="kw-yellow">// Circular reference — ref counting FAILS here</span>
+let objA = {};
+let objB = {};
+objA.ref = objB;   <span class="kw-purple">// objB ref count: 1</span>
+objB.ref = objA;   <span class="kw-purple">// objA ref count: 1 — never reaches 0!</span>
+<span class="kw-green">// Mark-and-sweep handles this correctly ✅</span></code></pre>
+        `
+      },
+      {
+        q: "V8 Generational GC & Best Practices",
+        icon: "⚡",
+        iconBg: "rgba(240,192,64,0.1)",
+        content: `
+          <pre><code><span class="kw-yellow">// V8 uses Generational GC — two heaps:</span>
+<span class="kw-purple">// Young Generation (Nursery) — new, short-lived objects</span>
+<span class="kw-purple">//   → Minor GC runs frequently, very fast</span>
+<span class="kw-purple">// Old Generation             — objects that survived Young GC</span>
+<span class="kw-purple">//   → Major GC (Full GC) runs less often, slower</span>
+
+<span class="kw-yellow">// Best practices to help the GC:</span>
+
+<span class="kw-yellow">// 1. Nullify references when done</span>
+let bigData = loadHugeArray();
+processData(bigData);
+bigData = null; <span class="kw-green">// eligible for collection now ✅</span>
+
+<span class="kw-yellow">// 2. Use WeakMap/WeakSet for object caches</span>
+<span class="kw-purple">// Regular Map holds strong refs — objects never GC'd</span>
+const cache = new WeakMap();
+<span class="kw-green">// WeakMap holds weak refs — objects GC'd when no other ref exists ✅</span>
+
+<span class="kw-yellow">// 3. Avoid creating objects in hot loops</span>
+<span class="kw-red">// ❌ Bad — creates garbage every frame</span>
+function gameLoop() {
+  const vec = { x: 0, y: 0 }; <span class="kw-red">// new object every tick</span>
+}
+
+<span class="kw-green">// ✅ Good — reuse objects</span>
+const vec = { x: 0, y: 0 };
+function gameLoop() {
+  vec.x = 0; vec.y = 0;       <span class="kw-green">// mutate, don't recreate</span>
+}</code></pre>
+          <div class="tip-box"><span class="tip-icon">💡</span><span>You can't force GC in JS, but you can <strong>help it</strong>: null out large objects, use WeakMap for caches, avoid closures that accidentally retain large scopes.</span></div>
+        `
+      }
+    ]
+  },
+  {
+    id: 19,
+    title: "Currying",
+    difficulty: "hard",
+    icon: "🍛",
+    color: "#ff8899",
+    iconBg: "rgba(255,136,153,0.1)",
+    section: "Advanced",
+    question: "Explain the concept of currying and provide a practical use case.",
+    cards: [
+      {
+        q: "What is Currying?",
+        icon: "🔀",
+        iconBg: "rgba(255,136,153,0.1)",
+        content: `
+          <p class="explanation"><strong>Currying</strong> transforms a function with multiple arguments into a <strong>sequence of functions</strong>, each taking a single argument. Named after mathematician Haskell Curry.</p>
+          <pre><code><span class="kw-yellow">// Normal function</span>
+function add(a, b, c) {
+  return a + b + c;
+}
+add(1, 2, 3); <span class="kw-green">// 6</span>
+
+<span class="kw-yellow">// Curried version — manual</span>
+function curriedAdd(a) {
+  return function(b) {
+    return function(c) {
+      return a + b + c;
+    };
+  };
+}
+curriedAdd(1)(2)(3); <span class="kw-green">// 6</span>
+
+<span class="kw-yellow">// Arrow function shorthand</span>
+const curriedAdd = a => b => c => a + b + c;
+curriedAdd(1)(2)(3); <span class="kw-green">// 6</span>
+
+<span class="kw-yellow">// Generic curry utility</span>
+function curry(fn) {
+  return function curried(...args) {
+    if (args.length >= fn.length) {
+      return fn.apply(this, args);          <span class="kw-purple">// enough args — call it</span>
+    }
+    return function(...more) {
+      return curried.apply(this, args.concat(more)); <span class="kw-purple">// collect more</span>
+    };
+  };
+}
+
+const add = curry((a, b, c) => a + b + c);
+add(1)(2)(3);   <span class="kw-green">// 6</span>
+add(1, 2)(3);   <span class="kw-green">// 6</span>
+add(1)(2, 3);   <span class="kw-green">// 6</span>
+add(1, 2, 3);   <span class="kw-green">// 6 — all styles work!</span></code></pre>
+        `
+      },
+      {
+        q: "Practical Use Cases",
+        icon: "🏭",
+        iconBg: "rgba(0,229,176,0.1)",
+        content: `
+          <pre><code><span class="kw-yellow">// 1. Partial Application — pre-fill arguments</span>
+const multiply = curry((a, b) => a * b);
+
+const double = multiply(2);   <span class="kw-purple">// pre-fill first arg</span>
+const triple = multiply(3);
+
+[1,2,3,4,5].map(double); <span class="kw-green">// [2, 4, 6, 8, 10]</span>
+[1,2,3,4,5].map(triple); <span class="kw-green">// [3, 6, 9, 12, 15]</span>
+
+<span class="kw-yellow">// 2. Configurable API calls</span>
+const fetchFrom = baseURL => endpoint => options =>
+  fetch(baseURL + endpoint, options);
+
+const fetchDev  = fetchFrom(<span class="kw-green">'https://dev.api.com'</span>);
+const fetchProd = fetchFrom(<span class="kw-green">'https://prod.api.com'</span>);
+
+const getUsers = fetchDev(<span class="kw-green">'/users'</span>);
+getUsers({ method: <span class="kw-green">'GET'</span> }); <span class="kw-green">// fetch dev users</span>
+
+<span class="kw-yellow">// 3. Event handling with config</span>
+const on = eventType => handler => element =>
+  element.addEventListener(eventType, handler);
+
+const onClick   = on(<span class="kw-green">'click'</span>);
+const onHover   = on(<span class="kw-green">'mouseenter'</span>);
+
+const logClick  = onClick(e => console.log(<span class="kw-green">'clicked'</span>, e.target));
+logClick(document.getElementById(<span class="kw-green">'btn'</span>));   <span class="kw-green">// attach to btn</span>
+logClick(document.getElementById(<span class="kw-green">'link'</span>));  <span class="kw-green">// reuse on link</span></code></pre>
+          <div class="tip-box"><span class="tip-icon">🎯</span><span>Currying shines in <strong>functional programming</strong> — it enables point-free style, reusable config, and clean function composition.</span></div>
+        `
+      }
+    ]
+  },
+  {
+    id: 20,
+    title: "Generators & Iterators",
+    difficulty: "hard",
+    icon: "⚡",
+    color: "#00e5b0",
+    iconBg: "rgba(0,229,176,0.1)",
+    section: "Advanced",
+    question: "What are generators and iterators in JavaScript?",
+    cards: [
+      {
+        q: "Iterators — The Protocol",
+        icon: "🔄",
+        iconBg: "rgba(0,229,176,0.1)",
+        content: `
+          <p class="explanation">An <strong>iterator</strong> is any object with a <code class="inline">next()</code> method that returns <code class="inline">{ value, done }</code>. This protocol powers <code class="inline">for...of</code>, spread, and destructuring.</p>
+          <pre><code><span class="kw-yellow">// Custom iterator</span>
+function createCounter(start, end) {
+  let current = start;
+  return {
+    next() {
+      if (current <= end) {
+        return { value: current++, done: false };
+      }
+      return { value: undefined, done: true };
+    }
+  };
+}
+
+const counter = createCounter(1, 3);
+counter.next(); <span class="kw-green">// { value: 1, done: false }</span>
+counter.next(); <span class="kw-green">// { value: 2, done: false }</span>
+counter.next(); <span class="kw-green">// { value: 3, done: false }</span>
+counter.next(); <span class="kw-green">// { value: undefined, done: true }</span>
+
+<span class="kw-yellow">// Make any object iterable (for...of support)</span>
+const range = {
+  from: 1, to: 5,
+  [Symbol.iterator]() {
+    let cur = this.from;
+    return {
+      next: () => cur <= this.to
+        ? { value: cur++, done: false }
+        : { value: undefined, done: true }
+    };
+  }
+};
+
+for (const n of range) console.log(n); <span class="kw-green">// 1 2 3 4 5</span>
+[...range]; <span class="kw-green">// [1, 2, 3, 4, 5]</span></code></pre>
+        `
+      },
+      {
+        q: "Generators — Pause & Resume Functions",
+        icon: "⏯",
+        iconBg: "rgba(123,97,255,0.1)",
+        content: `
+          <p class="explanation"><strong>Generators</strong> are functions that can <strong>pause execution</strong> at <code class="inline">yield</code> and resume later. They automatically implement the iterator protocol.</p>
+          <pre><code><span class="kw-yellow">// Generator function — note the * </span>
+function* counter(start, end) {
+  for (let i = start; i <= end; i++) {
+    yield i;  <span class="kw-purple">// pause here, return i</span>
+  }
+}
+
+const gen = counter(1, 3);
+gen.next(); <span class="kw-green">// { value: 1, done: false }</span>
+gen.next(); <span class="kw-green">// { value: 2, done: false }</span>
+gen.next(); <span class="kw-green">// { value: 3, done: false }</span>
+gen.next(); <span class="kw-green">// { value: undefined, done: true }</span>
+
+for (const n of counter(1, 5)) console.log(n); <span class="kw-green">// 1 2 3 4 5</span>
+
+<span class="kw-yellow">// Infinite sequence — no stack overflow!</span>
+function* infiniteIds() {
+  let id = 1;
+  while (true) {
+    yield id++;  <span class="kw-purple">// pauses each time — lazy evaluation</span>
+  }
+}
+
+const ids = infiniteIds();
+ids.next().value; <span class="kw-green">// 1</span>
+ids.next().value; <span class="kw-green">// 2</span>
+ids.next().value; <span class="kw-green">// 3</span>
+
+<span class="kw-yellow">// Two-way communication via yield</span>
+function* calculator() {
+  const x = yield <span class="kw-green">'Enter x:'</span>;
+  const y = yield <span class="kw-green">'Enter y:'</span>;
+  yield x + y;
+}
+
+const calc = calculator();
+calc.next();        <span class="kw-green">// { value: 'Enter x:' }</span>
+calc.next(10);      <span class="kw-green">// { value: 'Enter y:' }  — sends 10 as x</span>
+calc.next(20);      <span class="kw-green">// { value: 30 }           — sends 20 as y</span></code></pre>
+          <div class="tip-box"><span class="tip-icon">💡</span><span>Generators are perfect for <strong>lazy sequences</strong>, <strong>infinite streams</strong>, and were the foundation for async/await before it became native syntax.</span></div>
+        `
+      }
+    ]
+  },
+  {
+    id: 21,
+    title: "Deep Clone an Object",
+    difficulty: "med",
+    icon: "🪞",
+    color: "#f0c040",
+    iconBg: "rgba(240,192,64,0.1)",
+    section: "Advanced",
+    question: "How would you implement a deep clone of an object?",
+    cards: [
+      {
+        q: "5 Methods — Tradeoffs Compared",
+        icon: "⚖",
+        iconBg: "rgba(240,192,64,0.1)",
+        content: `
+          <table>
+            <tr><th>Method</th><th>Nested?</th><th>Functions?</th><th>Circular?</th><th>Dates/Maps?</th></tr>
+            <tr><td>Spread {...}</td><td>❌ Shallow</td><td>✅</td><td>✅</td><td>✅</td></tr>
+            <tr><td>JSON parse/stringify</td><td>✅ Deep</td><td>❌ Lost</td><td>❌ Error</td><td>❌ Lost</td></tr>
+            <tr><td>structuredClone()</td><td>✅ Deep</td><td>❌ Lost</td><td>✅</td><td>✅</td></tr>
+            <tr><td>Lodash _.cloneDeep</td><td>✅ Deep</td><td>✅</td><td>✅</td><td>✅</td></tr>
+            <tr><td>Custom recursive</td><td>✅ Deep</td><td>⚙ Custom</td><td>⚙ Custom</td><td>⚙ Custom</td></tr>
+          </table>
+          <pre><code><span class="kw-yellow">// Method 1: Spread — SHALLOW only</span>
+const original = { a: 1, nested: { b: 2 } };
+const shallow = { ...original };
+shallow.nested.b = 99;
+console.log(original.nested.b); <span class="kw-red">// 99 — still linked! ❌</span>
+
+<span class="kw-yellow">// Method 2: JSON trick — simple but lossy</span>
+const deep1 = JSON.parse(JSON.stringify(original));
+<span class="kw-red">// ❌ Loses: functions, undefined, Date, Map, Set, circular refs</span>
+
+<span class="kw-yellow">// Method 3: structuredClone() — modern best option</span>
+const deep2 = structuredClone(original); <span class="kw-green">// ✅ ES2022, built-in</span>
+<span class="kw-purple">// Handles nested, circular, Date, Map, Set, TypedArray</span></code></pre>
+        `
+      },
+      {
+        q: "Custom Deep Clone Implementation",
+        icon: "🛠",
+        iconBg: "rgba(123,97,255,0.1)",
+        content: `
+          <pre><code><span class="kw-yellow">// Full custom deep clone — interview gold!</span>
+function deepClone(obj, seen = new WeakMap()) {
+  <span class="kw-purple">// Handle primitives and null</span>
+  if (obj === null || typeof obj !== <span class="kw-green">'object'</span>) return obj;
+
+  <span class="kw-purple">// Handle circular references</span>
+  if (seen.has(obj)) return seen.get(obj);
+
+  <span class="kw-purple">// Handle special types</span>
+  if (obj instanceof Date)    return new Date(obj.getTime());
+  if (obj instanceof RegExp)  return new RegExp(obj);
+  if (obj instanceof Map) {
+    const mapCopy = new Map();
+    seen.set(obj, mapCopy);
+    obj.forEach((v, k) => mapCopy.set(deepClone(k, seen), deepClone(v, seen)));
+    return mapCopy;
+  }
+  if (obj instanceof Set) {
+    const setCopy = new Set();
+    seen.set(obj, setCopy);
+    obj.forEach(v => setCopy.add(deepClone(v, seen)));
+    return setCopy;
+  }
+
+  <span class="kw-purple">// Handle Arrays and plain Objects</span>
+  const clone = Array.isArray(obj) ? [] : {};
+  seen.set(obj, clone);          <span class="kw-purple">// store before recursing (handles circular)</span>
+
+  for (const key in obj) {
+    if (Object.hasOwn(obj, key)) {
+      clone[key] = deepClone(obj[key], seen);
+    }
+  }
+  return clone;
+}
+
+<span class="kw-yellow">// Test with circular reference</span>
+const a = { x: 1, nested: { y: 2 } };
+a.self = a; <span class="kw-purple">// circular!</span>
+const b = deepClone(a);
+b.nested.y = 99;
+console.log(a.nested.y); <span class="kw-green">// 2 — untouched ✅</span></code></pre>
+          <div class="tip-box"><span class="tip-icon">🎯</span><span>In production: use <code class="inline">structuredClone()</code> for most cases, <code class="inline">lodash.cloneDeep</code> when you need function cloning. Implement custom only in interviews!</span></div>
+        `
+      }
+    ]
+  },
+  {
+    id: 22,
+    title: "Memory Leaks",
+    difficulty: "hard",
+    icon: "💧",
+    color: "#7b61ff",
+    iconBg: "rgba(123,97,255,0.1)",
+    section: "Advanced",
+    question: "Explain memory leaks in JavaScript and how to prevent them.",
+    cards: [
+      {
+        q: "4 Common Causes of Memory Leaks",
+        icon: "🔍",
+        iconBg: "rgba(123,97,255,0.1)",
+        content: `
+          <p class="explanation">A <strong>memory leak</strong> happens when memory that's no longer needed is never released. JS has a GC but you can still accidentally keep references alive.</p>
+          <pre><code><span class="kw-yellow">// LEAK 1: Forgotten event listeners</span>
+function setup() {
+  const data = new Array(100000).fill(<span class="kw-green">'x'</span>); <span class="kw-purple">// big data</span>
+  document.addEventListener(<span class="kw-green">'click'</span>, () => {
+    console.log(data.length); <span class="kw-red">// closure keeps data alive FOREVER ❌</span>
+  });
+}
+<span class="kw-green">// Fix: remove the listener when done</span>
+const handler = () => { ... };
+element.addEventListener(<span class="kw-green">'click'</span>, handler);
+element.removeEventListener(<span class="kw-green">'click'</span>, handler); <span class="kw-green">// ✅ cleanup</span>
+
+<span class="kw-yellow">// LEAK 2: Global variables</span>
+function badFunc() {
+  leakedVar = <span class="kw-green">'I am global!'</span>; <span class="kw-red">// missing var/let/const — goes global ❌</span>
+}
+
+<span class="kw-yellow">// LEAK 3: Detached DOM nodes</span>
+let detached;
+function createNode() {
+  const div = document.createElement(<span class="kw-green">'div'</span>);
+  document.body.appendChild(div);
+  detached = div;              <span class="kw-purple">// keep reference</span>
+  document.body.removeChild(div); <span class="kw-red">// removed from DOM but JS still refs it ❌</span>
+}
+<span class="kw-green">// Fix: detached = null after removeChild ✅</span>
+
+<span class="kw-yellow">// LEAK 4: Timers not cleared</span>
+function startPolling() {
+  setInterval(() => {
+    <span class="kw-red">// runs forever, closured variables never freed ❌</span>
+    fetchData();
+  }, 1000);
+}
+<span class="kw-green">// Fix: store and clear the interval ID</span>
+const id = setInterval(fetchData, 1000);
+clearInterval(id); <span class="kw-green">// ✅ on component unmount</span></code></pre>
+        `
+      },
+      {
+        q: "Prevention & Detection Tools",
+        icon: "🛡",
+        iconBg: "rgba(0,229,176,0.1)",
+        content: `
+          <pre><code><span class="kw-yellow">// Prevention 1: WeakRef & WeakMap for caches</span>
+const cache = new WeakMap();
+<span class="kw-green">// If key object is GC'd, entry auto-removed ✅</span>
+
+<span class="kw-yellow">// Prevention 2: React — cleanup in useEffect</span>
+useEffect(() => {
+  const id = setInterval(tick, 1000);
+  const handler = () => doSomething();
+  window.addEventListener(<span class="kw-green">'resize'</span>, handler);
+
+  return () => {                       <span class="kw-green">// cleanup function ✅</span>
+    clearInterval(id);
+    window.removeEventListener(<span class="kw-green">'resize'</span>, handler);
+  };
+}, []);
+
+<span class="kw-yellow">// Prevention 3: AbortController for fetch</span>
+const controller = new AbortController();
+fetch(<span class="kw-green">'/api/data'</span>, { signal: controller.signal });
+controller.abort(); <span class="kw-green">// cancel + cleanup ✅</span></code></pre>
+          <ul class="key-points">
+            <li><strong>Chrome DevTools → Memory tab</strong> — take heap snapshots, compare before/after to find leaks</li>
+            <li><strong>Performance monitor</strong> — watch JS heap size over time; steady growth = leak</li>
+            <li><strong>Allocation Timeline</strong> — see exactly what's being allocated and retained</li>
+          </ul>
+          <div class="tip-box"><span class="tip-icon">🎯</span><span>Most leaks in SPAs come from event listeners and intervals not cleaned up on component unmount. Always return a cleanup function from <code class="inline">useEffect</code>.</span></div>
+        `
+      }
+    ]
+  },
+  {
+    id: 23,
+    title: "Microtasks vs Macrotasks",
+    difficulty: "hard",
+    icon: "🎭",
+    color: "#ff8899",
+    iconBg: "rgba(255,136,153,0.1)",
+    section: "Advanced",
+    question: "What is the difference between microtasks and macrotasks?",
+    cards: [
+      {
+        q: "The Full Task Queue Picture",
+        icon: "🗂",
+        iconBg: "rgba(255,136,153,0.1)",
+        content: `
+          <p class="explanation">The event loop processes tasks in strict priority order: <strong>Synchronous code</strong> first, then <strong>all microtasks</strong> (queue drained fully), then <strong>one macrotask</strong>, then microtasks again, and so on.</p>
+          <table>
+            <tr><th>Type</th><th>Sources</th><th>Priority</th></tr>
+            <tr><td>Synchronous</td><td>Normal JS code</td><td>1st — always</td></tr>
+            <tr><td>Microtask</td><td>Promise.then/catch, queueMicrotask, MutationObserver, await</td><td>2nd — all drain before next macro</td></tr>
+            <tr><td>Macrotask</td><td>setTimeout, setInterval, setImmediate, I/O, UI render</td><td>3rd — one at a time</td></tr>
+          </table>
+          <pre><code>console.log(<span class="kw-green">'1'</span>);                          <span class="kw-purple">// sync</span>
+
+setTimeout(() => console.log(<span class="kw-green">'2'</span>), 0);  <span class="kw-purple">// macrotask</span>
+
+Promise.resolve()
+  .then(() => console.log(<span class="kw-green">'3'</span>))          <span class="kw-purple">// microtask</span>
+  .then(() => console.log(<span class="kw-green">'4'</span>));         <span class="kw-purple">// microtask</span>
+
+queueMicrotask(() => console.log(<span class="kw-green">'5'</span>)); <span class="kw-purple">// microtask</span>
+
+console.log(<span class="kw-green">'6'</span>);                          <span class="kw-purple">// sync</span>
+
+<span class="kw-yellow">// Output: 1 → 6 → 3 → 5 → 4 → 2</span>
+<span class="kw-purple">// Sync(1,6) → all Microtasks(3,5,4) → Macrotask(2)</span></code></pre>
+        `
+      },
+      {
+        q: "Why This Matters — Tricky Interview Cases",
+        icon: "🧩",
+        iconBg: "rgba(240,192,64,0.1)",
+        content: `
+          <pre><code><span class="kw-yellow">// Microtasks can STARVE the event loop!</span>
+function infiniteMicrotasks() {
+  Promise.resolve().then(infiniteMicrotasks);
+}
+infiniteMicrotasks();
+<span class="kw-red">// ❌ UI freezes — microtasks never let macrotasks (like rendering) run</span>
+
+<span class="kw-yellow">// async/await = microtasks under the hood</span>
+async function foo() {
+  console.log(<span class="kw-green">'A'</span>);
+  await Promise.resolve();   <span class="kw-purple">// schedules rest as microtask</span>
+  console.log(<span class="kw-green">'B'</span>);
+}
+
+console.log(<span class="kw-green">'C'</span>);
+foo();
+console.log(<span class="kw-green">'D'</span>);
+<span class="kw-green">// Output: C → A → D → B</span>
+<span class="kw-purple">// 'B' runs as microtask AFTER all sync code finishes</span>
+
+<span class="kw-yellow">// Nested — microtasks spawn microtasks</span>
+Promise.resolve()
+  .then(() => {
+    console.log(<span class="kw-green">'micro 1'</span>);
+    Promise.resolve().then(() => console.log(<span class="kw-green">'micro 1a'</span>)); <span class="kw-purple">// nested</span>
+  })
+  .then(() => console.log(<span class="kw-green">'micro 2'</span>));
+
+setTimeout(() => console.log(<span class="kw-green">'macro'</span>), 0);
+<span class="kw-green">// Output: micro 1 → micro 1a → micro 2 → macro</span>
+<span class="kw-purple">// All microtasks (including newly spawned ones) finish before macro!</span></code></pre>
+          <div class="tip-box"><span class="tip-icon">🎯</span><span>This is the <strong>#1 most asked advanced JS interview question</strong>. Memorise: <strong>Sync → drain all Microtasks → one Macrotask → drain all Microtasks → repeat</strong>.</span></div>
         `
       }
     ]
